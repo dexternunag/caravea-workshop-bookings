@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useEffect } from "react";
+import { startTransition, useActionState, useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, type FieldPath } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -45,6 +45,7 @@ export function BookingForm({ booking }: BookingFormProps) {
   const router = useRouter();
   const action = booking ? updateBookingAction.bind(null, booking.id) : createBookingAction;
   const [state, formAction, isPending] = useActionState(action, initialBookingActionState);
+  const submittedInCurrentSession = useRef(false);
   const resetUi = useBookingFormUi((store) => store.reset);
   const setSubmitting = useBookingFormUi((store) => store.setSubmitting);
   const {
@@ -75,7 +76,8 @@ export function BookingForm({ booking }: BookingFormProps) {
   }, [setError, state.fieldErrors]);
 
   useEffect(() => {
-    if (state.success && state.bookingId) {
+    if (submittedInCurrentSession.current && state.success && state.bookingId) {
+      submittedInCurrentSession.current = false;
       resetForm(bookingToFormValues(booking));
       resetUi();
       router.push(`/bookings/${state.bookingId}`);
@@ -84,6 +86,7 @@ export function BookingForm({ booking }: BookingFormProps) {
 
   function submit(values: BookingFormValues) {
     clearErrors();
+    submittedInCurrentSession.current = true;
     startTransition(() => {
       formAction(bookingFormData(values));
     });

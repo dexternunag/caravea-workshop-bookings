@@ -1,0 +1,10 @@
+# Workspace artifacts
+/outputs/
+/work/
+/.superpowers/sdd/*
+!/.superpowers/sdd/.gitignore
+
+# Local environment files
+.env
+.env.local
+
